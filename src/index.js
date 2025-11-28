@@ -73,6 +73,8 @@ function update(time, delta) {
   if (bird.y > config.height || bird.y < -bird.height / 2) {
     restartGame();
   }
+
+  recyclePipe();
 }
 
 function placePipe(uPipe, lPipe) {
@@ -103,6 +105,18 @@ function getRightMostPipe() {
   });
 
   return rightMoxtx;
+}
+
+function recyclePipe() {
+  const tmpPipes = [];
+  pipe.getChildren().forEach((ch) => {
+    if (ch.getBounds().right < 0) {
+      tmpPipes.push(ch);
+      if (tmpPipes.length == 2) {
+        placePipe(...tmpPipes);
+      }
+    }
+  });
 }
 
 function flap() {
