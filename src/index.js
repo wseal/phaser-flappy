@@ -21,8 +21,8 @@ const config = {
 };
 
 let bird = null;
-let upperPipe = null;
-let lowerPipe = null;
+let pipe = null;
+
 const flapVelocityY = 200;
 const initalPos = { x: config.width * 0.1, y: config.height / 2 };
 
@@ -45,11 +45,19 @@ function create() {
   bird.body.gravity.y = 400;
   // debugger
 
+  pipe = this.physics.add.group();
+  // pipe.velocity.x = -200;
+
   for (let i = 0; i < 4; i++) {
-    upperPipe = this.physics.add.image(0, 0, "pipe").setOrigin(0, 1);
-    lowerPipe = this.physics.add.image(400, 0, "pipe").setOrigin(0, 0);
+    const upperPipe = pipe.create(0, 0, "pipe").setOrigin(0, 1);
+    const lowerPipe = pipe.create(0, 0, "pipe").setOrigin(0, 0);
+
     placePipe(upperPipe, lowerPipe);
   }
+
+  pipe.setVelocityX(-200);
+  console.log(pipe);
+  // debugger;
 
   this.input.on("pointerdown", flap);
   this.input.keyboard.on("keydown-SPACE", flap);
@@ -84,8 +92,8 @@ function placePipe(uPipe, lPipe) {
   lPipe.x = uPipe.x;
   lPipe.y = uPipe.y + pipVerticalDistance;
 
-  lPipe.body.velocity.x = -200;
-  uPipe.body.velocity.x = -200;
+  // lPipe.body.velocity.x = -200;
+  // uPipe.body.velocity.x = -200;
 }
 
 function flap() {
