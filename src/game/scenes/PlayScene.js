@@ -25,6 +25,7 @@ export default class PlayScene extends Phaser.Scene {
     this.createBG();
     this.createBird();
     this.createPipe();
+    this.createColliders();
     this.handleInput();
   }
 
@@ -41,6 +42,7 @@ export default class PlayScene extends Phaser.Scene {
   createBird() {
     this.bird = this.physics.add
       .sprite(this.config.startPos.x, this.config.startPos.y, "bird")
+      .setCollideWorldBounds(true)
       .setOrigin(0);
     // bird.body.velocity.x = 200;
     this.bird.body.gravity.y = 400;
@@ -49,8 +51,15 @@ export default class PlayScene extends Phaser.Scene {
   createPipe() {
     this.pipe = this.physics.add.group();
     for (let i = 0; i < 4; i++) {
-      const upperPipe = this.pipe.create(0, 0, "pipe").setOrigin(0, 1);
-      const lowerPipe = this.pipe.create(0, 0, "pipe").setOrigin(0, 0);
+      const upperPipe = this.pipe
+        .create(0, 0, "pipe")
+        .setImmovable(true) // 没有碰撞物理特性
+        .setOrigin(0, 1);
+
+      const lowerPipe = this.pipe
+        .create(0, 0, "pipe")
+        .setImmovable(true)
+        .setOrigin(0, 0);
 
       this.placePipe(upperPipe, lowerPipe);
     }
@@ -58,6 +67,12 @@ export default class PlayScene extends Phaser.Scene {
     this.pipe.setVelocityX(-this.flapVelocityY);
     // console.log(this.pipe);
     // debugger;
+  }
+
+  createColliders() {
+    this.physics.add.collider(this.bird, this.pipe, () => {
+      this.gameOver();
+    });
   }
 
   handleInput() {
@@ -70,10 +85,10 @@ export default class PlayScene extends Phaser.Scene {
   }
   checkBirdStatus() {
     if (
-      this.bird.y > this.config.height ||
-      this.bird.y < -this.bird.height / 2
+      this.bird.getBounds().bottom >= this.config.height ||
+      this.bird.y <= 0
     ) {
-      this.restartGame();
+      this.gameOver();
     }
   }
 
@@ -122,9 +137,13 @@ export default class PlayScene extends Phaser.Scene {
     this.bird.body.velocity.y = -this.flapVelocityY;
   }
 
-  restartGame() {
-    this.bird.x = this.config.startPos.x;
-    this.bird.y = this.config.startPos.y;
-    this.bird.body.velocity.y = 0;
+  gameOver() {
+    // this.bird.x = this.config.startPos.x;
+    // this.bird.y = this.config.startPos.y;
+    // this.bird.body.velocity.y = 0;
+    // this.bird.body.velocity.x = 0;
+
+    this.physics.pause();
+    this.bird.setTint(0xee4824);
   }
 }
