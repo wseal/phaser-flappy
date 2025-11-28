@@ -20,23 +20,39 @@ const config = {
   },
 };
 
+let bird = null;
+let upperPipe = null;
+let lowerPipe = null;
+const flapVelocityY = 200;
+const initalPos = { x: config.width * 0.1, y: config.height / 2 };
+const pipeVerticalDistanceRange = [150, 250];
+const pipVerticalDistance = Phaser.Math.Between(
+  pipeVerticalDistanceRange[0],
+  pipeVerticalDistanceRange[1]
+);
+const pipVerticalPos = Phaser.Math.Between(
+  20,
+  config.height - 20 - pipVerticalDistance
+);
+
 // load assets, such as images, music, animations ...
 function preload() {
   this.load.image("sky", "assets/sky.png");
   this.load.image("bird", "assets/bird.png");
+  this.load.image("pipe", "assets/pipe.png");
 }
 
-let bird = null;
-const flapVelocityY = 200;
-const initalPos = { x: config.width * 0.1, y: config.height / 2 };
 //
 function create() {
-  let sky = this.add.image(initalPos.x, initalPos.y, "sky");
+  let sky = this.add.image(config.width / 2, config.height / 2, "sky");
   sky.setOrigin(0.5, 0.5);
 
-  bird = this.physics.add
-    .sprite(config.width / 3, config.height / 4, "bird")
-    .setOrigin(0);
+  bird = this.physics.add.sprite(initalPos.x, initalPos.y, "bird").setOrigin(0);
+
+  upperPipe = this.add.image(400, pipVerticalPos, "pipe").setOrigin(0, 1);
+  lowerPipe = this.add
+    .image(400, upperPipe.y + pipVerticalDistance, "pipe")
+    .setOrigin(0, 0);
 
   // bird.body.velocity.x = 200;
   // bird.body.gravity.y = 100;
