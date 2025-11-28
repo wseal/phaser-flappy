@@ -26,8 +26,8 @@ let pipe = null;
 const flapVelocityY = 200;
 const initalPos = { x: config.width * 0.1, y: config.height / 2 };
 
-let pipHorizontalDistance = 10;
 const pipeVerticalDistanceRange = [150, 250];
+const pipeHorizontalDistanceRange = [400, 450];
 
 // load assets, such as images, music, animations ...
 function preload() {
@@ -76,17 +76,17 @@ function update(time, delta) {
 }
 
 function placePipe(uPipe, lPipe) {
-  pipHorizontalDistance += 400;
-  const pipVerticalDistance = Phaser.Math.Between(
-    pipeVerticalDistanceRange[0],
-    pipeVerticalDistanceRange[1]
+  const rightMostX = getRightMostPipe();
+  const pipHorizontalDistance = Phaser.Math.Between(
+    ...pipeHorizontalDistanceRange
   );
+  const pipVerticalDistance = Phaser.Math.Between(...pipeVerticalDistanceRange);
   const pipVerticalPos = Phaser.Math.Between(
     20,
     config.height - 20 - pipVerticalDistance
   );
 
-  uPipe.x = pipHorizontalDistance;
+  uPipe.x = rightMostX + pipHorizontalDistance;
   uPipe.y = pipVerticalPos;
 
   lPipe.x = uPipe.x;
@@ -94,6 +94,15 @@ function placePipe(uPipe, lPipe) {
 
   // lPipe.body.velocity.x = -200;
   // uPipe.body.velocity.x = -200;
+}
+
+function getRightMostPipe() {
+  let rightMoxtx = 0;
+  pipe.getChildren().forEach(function (pipe) {
+    rightMoxtx = Math.max(pipe.x, rightMoxtx);
+  });
+
+  return rightMoxtx;
 }
 
 function flap() {
