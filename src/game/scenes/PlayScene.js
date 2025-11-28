@@ -10,7 +10,7 @@ export default class PlayScene extends Phaser.Scene {
     this.bird = null;
     this.pipe = null;
 
-    this.flapVelocityY = 200;
+    this.flapVelocityY = 350;
     this.pipeVerticalDistanceRange = [150, 250];
     this.pipeHorizontalDistanceRange = [400, 450];
   }
@@ -45,7 +45,7 @@ export default class PlayScene extends Phaser.Scene {
       .setCollideWorldBounds(true)
       .setOrigin(0);
     // bird.body.velocity.x = 200;
-    this.bird.body.gravity.y = 400;
+    this.bird.body.gravity.y = 600;
   }
 
   createPipe() {
@@ -145,5 +145,14 @@ export default class PlayScene extends Phaser.Scene {
 
     this.physics.pause();
     this.bird.setTint(0xee4824);
+
+    // delay event
+    this.time.addEvent({
+      delay: 1000,
+      callback: () => {
+        this.scene.restart();
+      },
+      loop: false,
+    });
   }
 }
