@@ -1,5 +1,8 @@
 import Phaser from "phaser";
 import PlayScene from "./game/scenes/PlayScene";
+import PreloadScene from "./game/scenes/PreloadScene";
+import PauseScene from "./game/scenes/PauseScene";
+import MenuScene from "./game/scenes/MenuScene";
 
 const WIDTH = 800;
 const HEIGHT = 600;
@@ -8,6 +11,10 @@ const SHARE = {
   height: HEIGHT,
   startPos: { x: WIDTH / 5, y: HEIGHT / 2 },
 };
+
+const Scenes = [PreloadScene, PauseScene, MenuScene, PlayScene];
+const createScene = (Scene) => new Scene(SHARE);
+const initScenes = () => Scenes.map(createScene);
 
 const config = {
   type: Phaser.AUTO,
@@ -21,7 +28,7 @@ const config = {
   },
   ...SHARE,
 
-  scene: [new PlayScene(SHARE)],
+  scene: initScenes(),
 };
 
 document.addEventListener("DOMContentLoaded", () => {

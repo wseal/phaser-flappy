@@ -1,14 +1,13 @@
 import Phaser from "phaser";
+import BaseScene from "./BaseScene";
 
-export default class PlayScene extends Phaser.Scene {
+export default class PlayScene extends BaseScene {
   constructor(config) {
-    super("PlayScene");
-
-    this.config = config;
-    console.log(this.config);
+    super("PlayScene", config);
 
     this.bird = null;
     this.pipe = null;
+    this.isPaused = false;
 
     this.flapVelocityY = 350;
     this.pipeVerticalDistanceRange = [150, 250];
@@ -18,14 +17,9 @@ export default class PlayScene extends Phaser.Scene {
     this.scoreText = null;
   }
 
-  preload() {
-    this.load.image("sky", "assets/sky.png");
-    this.load.image("bird", "assets/bird.png");
-    this.load.image("pipe", "assets/pipe.png");
-    this.load.image("pause", "assets/pause.png");
-  }
-
   create() {
+    super.create();
+
     this.createBG();
     this.createBird();
     this.createPipe();
@@ -33,12 +27,49 @@ export default class PlayScene extends Phaser.Scene {
     this.createScore();
     this.createPause();
     this.handleInput();
+    this.listenToEvents();
+
+    this.bird.play("flyy");
   }
 
   update(time, delta) {
     this.checkBirdStatus();
 
     this.recyclePipe();
+  }
+
+  listenToEvents() {
+    if (this.pauseEvent) {
+      return;
+    }
+
+    this.pauseEvent = this.events.on("resume", () => {
+      this.initialTime = 3;
+      this.countDownText = this.add
+        .text(
+          ...this.screenCenter,
+          "Fly in: " + this.initialTime,
+          this.fontOptions
+        )
+        .setOrigin(0.5);
+      this.timedEvent = this.time.addEvent({
+        delay: 1000,
+        callback: this.countDown,
+        callbackScope: this,
+        loop: true,
+      });
+    });
+  }
+
+  countDown() {
+    this.initialTime--;
+    this.countDownText.setText("Fly in: " + this.initialTime);
+    if (this.initialTime <= 0) {
+      this.isPaused = false;
+      this.countDownText.setText("");
+      this.physics.resume();
+      this.timedEvent.remove();
+    }
   }
 
   createBG() {
@@ -48,9 +79,11 @@ export default class PlayScene extends Phaser.Scene {
   createBird() {
     this.bird = this.physics.add
       .sprite(this.config.startPos.x, this.config.startPos.y, "bird")
+      .setFlipX(true)
       .setCollideWorldBounds(true)
       .setOrigin(0);
     // bird.body.velocity.x = 200;
+    this.bird.body.setSize(this.bird.width, this.bird.height - 8);
     this.bird.body.gravity.y = 600;
   }
 
@@ -102,14 +135,21 @@ export default class PlayScene extends Phaser.Scene {
       .setOrigin(1);
 
     pauseBtn.setInteractive();
-    pauseBtn.on("pointerdown", () => {
+    this.isPaused = false;
+    pauseBtn.on("pointerdown", (pointer, localX, localY, event) => {
+      event.stopPropagation();
+
+      this.isPaused = true;
       this.physics.pause();
       this.scene.pause();
+
+      this.scene.launch("PauseScene");
     });
   }
 
   handleInput() {
-    this.input.on("pointerdown", () => {
+    this.input.on("pointerdown", (pointer, localX, localY, event) => {
+      console.log("handle pointerdown clicked");
       this.flap();
     });
     this.input.keyboard.on("keydown-SPACE", () => {
@@ -194,6 +234,11 @@ export default class PlayScene extends Phaser.Scene {
   }
 
   flap() {
+    console.log("flap----------------->", this.isPaused);
+    if (this.isPaused) {
+      return;
+    }
+
     this.bird.body.velocity.y = -this.flapVelocityY;
   }
 
